@@ -1,9 +1,9 @@
-// SETUP - MAP DIMENSIONS
+// ---------- CONFIG ----------
 
 const cols = 80;
 const rows = 24;
 
-// CLASSES
+// ---------- CLASSES ----------
 
 class Creature {
    constructor(symbol, x, y) {
@@ -22,10 +22,7 @@ class Player extends Creature {
    }
 }
 
-const monster = new Creature("M", 20, 6);
-const player = new Player("@", 40, 12, "Fighter");
-
-// RENDER MAP
+// ---------- HELPER FUNCTIONS ----------
 
 const title = " DUNGEON OF CODE ";
 
@@ -40,26 +37,45 @@ function center(string) {
    return returnString;
 }
 
-console.clear();
+// ---------- RENDER SCREEN ----------
 
-console.log(center(title));
+function render() {
+   console.clear();
 
-for (let y = 0; y < rows - 2; y++) {
-   let rowOutput = "";
-   for (let x = 0; x < cols; x++) {
-      if (x === player.x && y === player.y) {
-         rowOutput += player.symbol;
-      } else if (x === monster.x && y === monster.y) {
-         rowOutput += monster.symbol;
-      } else {
-         rowOutput += ".";
+   // RENDER: Title Bar
+
+   console.log(center(title));
+
+   // RENDER: Map
+
+   for (let y = 0; y < rows - 2; y++) {
+      let rowOutput = "";
+      for (let x = 0; x < cols; x++) {
+         if (x === player.x && y === player.y) {
+            rowOutput += player.symbol;
+         } else if (x === monster.x && y === monster.y) {
+            rowOutput += monster.symbol;
+         } else {
+            rowOutput += ".";
+         }
       }
+      console.log(rowOutput);
    }
-   console.log(rowOutput);
+
+   // RENDER: Status Bar
+
+   console.log(
+      ` Class: ${player.playerClass} | Lvl: 1 | 🛡️  Chain Mail | 🗡️  Longsword | HP: ${player.hp} | XP: 0`
+   );
 }
 
-// RENDER STATUS BAR
+// ---------- INITIALIZATION ----------
 
-console.log(
-   ` Class: ${player.playerClass} | Lvl: 1 | 🛡️  Chain Mail | 🗡️  Longsword | HP: ${player.hp} | XP: 0`
-);
+const monster = new Creature("M", 20, 6);
+const player = new Player("@", 40, 12, "Fighter");
+
+// ToDo: random position of monster(s)
+
+// ---------- START GAME ----------
+
+render();
