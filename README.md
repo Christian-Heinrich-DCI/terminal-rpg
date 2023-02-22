@@ -1,5 +1,7 @@
 # Terminal RPG
 
+![Preview Image](screenshot.png)
+
 ## Steuerung (WASD)
 
 -  w - hoch
