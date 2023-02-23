@@ -86,13 +86,6 @@ function fight(monster) {
 
 // ---------- RENDER SCREEN ----------
 
-const inventory = {
-   x: 60,
-   y: 1,
-   width: 20,
-   height: 10,
-};
-
 function renderInventory() {
    console.clear();
    console.log(center(chalk.bold("Inventory")));
@@ -131,15 +124,6 @@ function render() {
          } else if (x === monster.x && y === monster.y) {
             if (monster.hp > 0) rowOutput += chalk.bold.red(monster.symbol);
             else rowOutput += chalk.bold.dim(monster.symbol);
-
-            // INVENTORY ???
-            // } else if (
-            //    x >= inventory.x &&
-            //    x <= inventory.x + inventory.width &&
-            //    y >= inventory.y &&
-            //    y <= inventory.y + inventory.height
-            // ) {
-            //    rowOutput += " ";
          } else {
             rowOutput += chalk.gray(".");
          }

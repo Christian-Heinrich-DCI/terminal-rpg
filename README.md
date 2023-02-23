@@ -22,4 +22,5 @@
 -  Attacken mit SpielerIn / Monstern verbinden
 -  mehrere Monster
 -  zufällig im Dungeon verteilte Schriftrollen -> Zauber (neue Attacke)
+-  Fallen
 -  Loot!
