@@ -69,15 +69,50 @@ function checkColision(direction) {
 
 // ---------- FIGHT ----------
 
+function roll(d) {
+   return Math.floor(Math.random() * d + 1); //
+}
+
 function fight(monster) {
-   player.hit(monster);
-   monster.hit(player);
-   if (monster.hp > 0)
-      infoBar = `You attack the ${monster.name} with your ${player.weapon}`;
-   else infoBar = title;
+   const playerDamage = roll(8);
+   player.hit(monster, playerDamage);
+   const monsterDamage = roll(4) + 1;
+   monster.hit(player, monsterDamage);
+   if (monster.hp > 0 && player.hp > 0)
+      infoBar = `You attack the ${monster.name} with your ${player.weapon} for ${playerDamage} damage.`;
+   else if (player.hp <= 0) infoBar = `You Died.`;
+   else infoBar = `You killed the ${monster.name} and gained 1 XP.`;
 }
 
 // ---------- RENDER SCREEN ----------
+
+const inventory = {
+   x: 60,
+   y: 1,
+   width: 20,
+   height: 10,
+};
+
+function renderInventory() {
+   console.clear();
+   console.log(center(chalk.bold("Inventory")));
+   console.log(
+      "\n",
+      chalk.underline("Note:") +
+         " Press [i] again to leave inventory screen and return to map.\n       [w] / [s] for switching weapon"
+   );
+   console.log(chalk.bold("\n --- Weapons ---"));
+   console.log(chalk.inverse("  * Longsword (1D8 Damage) "));
+   console.log("  * Dagger (1D4 Damage) ");
+   let key = readlineSync.keyIn("", {
+      hideEchoBack: true,
+      mask: "",
+      limit: "wsi",
+   });
+   if (key === "i") {
+      console.log("Nochmal i");
+   }
+}
 
 function render() {
    console.clear();
@@ -96,27 +131,24 @@ function render() {
          } else if (x === monster.x && y === monster.y) {
             if (monster.hp > 0) rowOutput += chalk.bold.red(monster.symbol);
             else rowOutput += chalk.bold.dim(monster.symbol);
+
+            // INVENTORY ???
+            // } else if (
+            //    x >= inventory.x &&
+            //    x <= inventory.x + inventory.width &&
+            //    y >= inventory.y &&
+            //    y <= inventory.y + inventory.height
+            // ) {
+            //    rowOutput += " ";
          } else {
             rowOutput += chalk.gray(".");
          }
       }
+      // row = rowOutput.substring(0, inventory.x) + "Test";
       console.log(rowOutput);
    }
 
    // RENDER: Status Bar
-   // * Name
-   // const renderName = player.name;
-   // * Class
-   // const renderClass = player.playerClass;
-
-   // * Level
-   const renderLevel = `Lvl ${player.level}`;
-
-   // * Armor
-   const renderArmor = `🛡️  Chain Mail`;
-
-   // * Weapon
-   const renderWeapon = `🗡️  Longsword`;
 
    // * HitPoints - Color depends on amount:
    // green: > 66%
@@ -131,25 +163,18 @@ function render() {
    else if (player.hp > 0) renderHP += chalk.red(player.hp);
    else renderHP += "💀";
 
-   // * Experience
-   const renderXP = `XP ${player.xp}`;
-
-   // * Menü
-   const renderQuit = "[q]uit";
-
    const output = [
       player.name,
       player.playerClass,
-      renderLevel,
-      renderArmor,
-      renderWeapon,
+      `Lvl ${player.level}`,
+      `🛡️  Chain Mail`,
+      `🗡️  Longsword`,
       renderHP,
-      renderXP,
-      renderQuit,
+      `XP ${player.xp}`,
+      "[q]uit",
    ].join(chalk.dim(" | "));
 
    console.log(output);
-   console.log("Hier History");
 }
 
 // ---------- INITIALIZATION ----------
@@ -178,7 +203,7 @@ while (true) {
    let key = readlineSync.keyIn("", {
       hideEchoBack: true,
       mask: "",
-      limit: "wasdq",
+      limit: "wasdiq",
    });
    if (key === "w") {
       checkColision("up");
@@ -188,6 +213,8 @@ while (true) {
       checkColision("down");
    } else if (key === "d") {
       checkColision("right");
+   } else if (key === "i") {
+      renderInventory();
    } else if (key === "q") {
       break;
    }

@@ -6,12 +6,12 @@ export class Creature {
       this.symbol = symbol;
       this.x = x;
       this.y = y;
-      this.hp = 3; // noch fest
+      this.hp = 10; // noch fest
    }
-   hit(target) {
+   hit(target, damage) {
       // ToDo: Schaden auswürfeln (Longsword - 1D8)
       // Spell - ???
-      if (target.hp > 0) target.hp--;
+      if (target.hp > 0) target.hp -= damage;
       if (this.level && target.hp === 0) this.xp++;
    }
 }
