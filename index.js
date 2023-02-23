@@ -1,48 +1,12 @@
 import readlineSync from "readline-sync";
 import chalk from "chalk";
+import { Creature, Player, Attack } from "./classes.js";
 
 // ---------- CONFIG ----------
 
 const title = "DUNGEON OF CODE";
 const cols = 80;
 const rows = 24;
-
-// ---------- CLASSES ----------
-
-class Creature {
-   constructor(symbol, x, y) {
-      this.symbol = symbol;
-      this.x = x;
-      this.y = y;
-      this.hp = 3;
-   }
-   hit(target) {
-      if (target.hp > 0) target.hp--;
-      if (target.hp === 0) player.xp++;
-   }
-}
-
-class Player extends Creature {
-   constructor(symbol, x, y, playerClass) {
-      super(symbol, x, y);
-      this.playerClass = playerClass;
-      this.maxHp = playerClass === "Fighter" ? 10 : 6;
-      this.hp = this.maxHp;
-      this.maxMp = playerClass === "Fighter" ? 0 : 4;
-      this.mp = this.maxMp;
-      this.xp = 0;
-      this.level = 1;
-   }
-}
-
-class Attack {
-   constructor(name, type, damage, cost) {
-      this.name = name;
-      this.type = type;
-      this.damage = damage;
-      this.cost = cost;
-   }
-}
 
 // ---------- HELPER FUNCTIONS ----------
 
@@ -57,6 +21,62 @@ function center(string) {
    return returnString;
 }
 
+// ---------- CHECK FOR ITEM/MONSTER INTERACTION ----------
+
+function checkColision(direction) {
+   switch (direction) {
+      case "up":
+         if (
+            player.x === monster.x &&
+            player.y - 1 === monster.y &&
+            monster.hp > 0
+         ) {
+            fight(monster);
+         } else player.y--;
+         break;
+      case "left":
+         if (
+            player.x - 1 === monster.x &&
+            player.y === monster.y &&
+            monster.hp > 0
+         ) {
+            fight(monster);
+         } else player.x--;
+         break;
+      case "down":
+         if (
+            player.x === monster.x &&
+            player.y + 1 === monster.y &&
+            monster.hp > 0
+         ) {
+            fight(monster);
+         } else player.y++;
+         break;
+      case "right":
+         if (
+            player.x + 1 === monster.x &&
+            player.y === monster.y &&
+            monster.hp > 0
+         ) {
+            fight(monster);
+         } else player.x++;
+         break;
+      default:
+         // something
+         break;
+   }
+}
+
+// ---------- FIGHT ----------
+
+function fight(monster) {
+   player.hit(monster);
+   monster.hit(player);
+   if (monster.hp > 0)
+      infoBar = `You attack the ${monster.name} with your ${player.weapon}`;
+   else infoBar = title;
+}
+
 // ---------- RENDER SCREEN ----------
 
 function render() {
@@ -64,7 +84,7 @@ function render() {
 
    // RENDER: Title Bar
 
-   console.log(center(title));
+   console.log(center(infoBar));
 
    // RENDER: Map
 
@@ -84,29 +104,42 @@ function render() {
    }
 
    // RENDER: Status Bar
+   // * Name
+   // const renderName = player.name;
    // * Class
-   const renderClass = `Class: ${player.playerClass}`;
+   // const renderClass = player.playerClass;
+
    // * Level
-   const renderLevel = `Lvl: ${player.level}`;
+   const renderLevel = `Lvl ${player.level}`;
+
    // * Armor
    const renderArmor = `🛡️  Chain Mail`;
+
    // * Weapon
    const renderWeapon = `🗡️  Longsword`;
-   // * HitPoints
-   let renderHP = "HP: ";
+
+   // * HitPoints - Color depends on amount:
+   // green: > 66%
+   // yellow: 66% - 34%
+   // red: <= 33%
+   // skull: 0 HP (dead)
+   let renderHP = "HP ";
    if (player.hp === player.maxHp) renderHP += player.hp;
    else if (player.hp > player.maxHp * 0.67) renderHP += chalk.green(player.hp);
    else if (player.hp > player.maxHp * 0.33)
       renderHP += chalk.yellow(player.hp);
    else if (player.hp > 0) renderHP += chalk.red(player.hp);
    else renderHP += "💀";
+
    // * Experience
-   const renderXP = `XP: ${player.xp}`;
+   const renderXP = `XP ${player.xp}`;
+
    // * Menü
    const renderQuit = "[q]uit";
 
    const output = [
-      renderClass,
+      player.name,
+      player.playerClass,
       renderLevel,
       renderArmor,
       renderWeapon,
@@ -116,15 +149,16 @@ function render() {
    ].join(chalk.dim(" | "));
 
    console.log(output);
+   console.log("Hier History");
 }
 
 // ---------- INITIALIZATION ----------
 
 // Creatures
-const monster = new Creature("O", 38, 10);
+const monster = new Creature("Goblin", "G", 38, 10);
 // const goblin = new Creature("G", 32, 14);
 // const monster = [ork, goblin];
-const player = new Player("@", 40, 12, "Fighter");
+const player = new Player("Bob", "@", 40, 12, "Fighter");
 
 // Attacks
 const spark = new Attack("Spark", "magical", "1D4", 1);
@@ -132,47 +166,29 @@ const longsword = new Attack("Longsword", "physical", "1D8", 0);
 
 // ToDo: random position of monster(s)
 
-// ---------- START GAME ----------
+// ---------- GAME LOOP ----------
 
-function checkColision(direction) {
-   switch (direction) {
-      case "left":
-         // something
-         break;
-      case "up":
-         if (player.x === monster.x && player.y - 1 === monster.y) {
-            player.hit(monster);
-            monster.hit(player);
-         } else player.y--;
-         break;
-      default:
-         // something
-         break;
-   }
-}
+let infoBar = title;
 
 while (true) {
+   // DRAW MAP
    render();
+
+   // LISTEN TO KEYBOARD INPUT
    let key = readlineSync.keyIn("", {
       hideEchoBack: true,
       mask: "",
-      limit: "wasdtq",
+      limit: "wasdq",
    });
    if (key === "w") {
       checkColision("up");
    } else if (key === "a") {
-      player.x--;
+      checkColision("left");
    } else if (key === "s") {
-      player.y++;
+      checkColision("down");
    } else if (key === "d") {
-      player.x++;
-   } else if (key === "t") {
-      // Test
-      monster.hit(player);
+      checkColision("right");
    } else if (key === "q") {
       break;
    }
-   //  else {
-   //    break;
-   // }
 }
